@@ -113,20 +113,50 @@ export default {
             stage: '',
             account_id: '',
             closing_date: '',
+            errors: {},
+            loading: false,
+            message: null,
+            accounts: [],
         };
     },
     methods: {
-        submitForm() {
-            axios.post('/api/create-deal', {
-                name: this.name,
-                stage: this.stage,
-                account_id: this.account_id,
-                closing_date: this.closing_date,
-            }).then(response => {
-                alert("Успішно створено!");
-            }).catch(error => {
-                alert("Помилка: " + error.response.data);
-            });
+        async submitForm() {
+            this.errors = {};
+            this.loading = true;
+            this.message = null;
+
+            try {
+                await axios.post('/api/create-deal', {
+                    name: this.name,
+                    stage: this.stage,
+                    account_id: this.account_id,
+                    closing_date: this.closing_date,
+                });
+
+                this.message = {
+                    type: 'success',
+                    text: 'Аккаунт успішно створено!'
+                };
+                this.resetForm();
+
+            }catch (error) {
+                if (error.response && error.response.status === 400) {
+                    this.errors = error.response.data.errors;
+                } else {
+                    this.message = {
+                        type: 'error',
+                        text: "Сталася помилка: " + error.message
+                    };
+                }
+            }
+            this.loading = false;
+        },
+
+        resetForm() {
+            this.name = '';
+            this.website = '';
+            this.phone = '';
+            this.errors = {};
         }
     }
 };
