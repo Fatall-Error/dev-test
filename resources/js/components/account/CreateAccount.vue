@@ -111,20 +111,32 @@ export default {
             this.message = null;
 
             try {
-                await axios.post('/api/create-account', {
+                const response = await axios.post('/api/create-account', {
                     name: this.name,
                     website: this.website,
                     phone: this.phone,
                 });
 
-                this.message = {
-                    type: 'success',
-                    text: 'Аккаунт успішно створено!'
-                };
-                this.resetForm();
+                if (response.data && response.data.status && response.data.status === 'error') {
+                    this.message = {
+                        type: 'error',
+                        text: response.data.message || 'Помилка створення угоди.'
+                    };
+                } else {
+                    this.message = {
+                        type: 'success',
+                        text: 'Угоду успішно створено!'
+                    };
+                    this.resetForm();
+                }
 
             } catch (error) {
-                if (error.response && error.response.status === 400) {
+                if (error.response.data.code === 'AUTHENTICATION_FAILURE') {
+                    this.message = {
+                        type: 'error',
+                        text: 'Помилка аутентифікації: ' + error.response.data.message
+                    };
+                } else if (error.response && error.response.status === 422) {
                     this.errors = error.response.data.errors;
                 } else {
                     this.message = {
