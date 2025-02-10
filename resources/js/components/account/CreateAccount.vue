@@ -2,12 +2,13 @@
     <form @submit.prevent="submitForm" class="card shadow-sm p-4">
         <div class="card-body">
             <h5 class="card-title mb-4">Створення нового аккаунту</h5>
-
+            <!-- Block for messages of success or Error -->
             <div v-if="message" :class="['alert', 'alert-dismissible', 'fade', 'show', message.type === 'success' ? 'alert-success' : 'alert-danger']">
                 <strong>{{ message.type === 'success' ? 'Успіх!' : 'Помилка!' }}</strong> {{ message.text }}
                 <button type="button" class="btn-close" @click="message = null"></button>
             </div>
             <div class="row g-3">
+                <!-- Name acoount -->
                 <div class="col-12">
                     <label for="name" class="form-label">Назва аккаунту</label>
                     <input
@@ -23,6 +24,7 @@
                         {{ errors.name[0] }}
                     </div>
                 </div>
+                <!-- Website account -->
                 <div class="col-md-6">
                     <label for="website" class="form-label">Вебсайт</label>
                     <div class="input-group">
@@ -40,6 +42,7 @@
                         </div>
                     </div>
                 </div>
+                <!-- Phone account -->
                 <div class="col-md-6">
                     <label for="phone" class="form-label">Телефон</label>
                     <div class="input-group">
@@ -57,6 +60,7 @@
                         </div>
                     </div>
                 </div>
+                <!-- Submit Button -->
                 <div class="col-12 mt-4">
                     <button type="submit" class="btn btn-primary w-100" :disabled="loading">
                         <i class="bi bi-file-earmark-plus me-2"></i>
@@ -126,7 +130,7 @@ export default {
 <style scoped>
 .card {
     max-width: 550px;
-    margin: auto;
+    margin:  100px auto;
     border-radius: 10px;
 }
 
