@@ -22,7 +22,8 @@
         <div class="card-body">
             <h5 class="card-title mb-4">Створення нової угоди</h5>
             <!-- Block for messages of success or Error -->
-            <div v-if="message" :class="['alert', 'alert-dismissible', 'fade', 'show', message.type === 'success' ? 'alert-success' : 'alert-danger']">
+            <div v-if="message"
+                 :class="['alert', 'alert-dismissible', 'fade', 'show', message.type === 'success' ? 'alert-success' : 'alert-danger']">
                 <strong>{{ message.type === 'success' ? 'Успіх!' : 'Помилка!' }}</strong> {{ message.text }}
                 <button type="button" class="btn-close" @click="message = null"></button>
             </div>
@@ -35,9 +36,12 @@
                         class="form-control"
                         id="name"
                         v-model="name"
+                        :class="{'is-invalid': errors.name}"
                         placeholder="Введіть назву угоди"
-                        required
                     >
+                    <div v-if="errors.name" class="invalid-feedback">
+                        {{ errors.name[0] }}
+                    </div>
                 </div>
 
                 <!-- Stage Deal -->
@@ -47,7 +51,7 @@
                         class="form-select"
                         id="stage"
                         v-model="stage"
-                        required
+                        :class="{'is-invalid': errors.stage}"
                     >
                         <option value="" disabled>Оберіть стадію</option>
                         <option value="Qualification" selected>Qualification</option>
@@ -60,44 +64,50 @@
                         <option value="Closed Lost">Closed Lost</option>
                         <option value="Closed Lost to Competition">Closed Lost to Competition</option>
                     </select>
+                    <div v-if="errors.stage" class="invalid-feedback">
+                        {{ errors.stage[0] }}
+                    </div>
                 </div>
 
                 <!-- Account Name -->
                 <div class="col-md-6">
                     <label for="account_id" class="form-label">Назва аккаунту</label>
-                    <select
-                        class="form-select"
-                        id="account_id"
-                        v-model="account_id"
-                        required
-                    >
-                        <option value="" disabled>Оберіть стадію</option>
-                        <option>Перший контакт</option>
-                        <option>Переговори</option>
-                        <option>Узгодження</option>
-                        <option>Завершено</option>
+                    <select class="form-select" id="account_id" v-model="account_id"
+                            :class="{'is-invalid': errors.account_id}" >
+                        <option value="" disabled>Оберіть аккаунт</option>
+                        <option v-for="account in accounts" :key="account.id" :value="account.id">
+                            {{ account.Account_Name }}
+                        </option>
                     </select>
+                    <div v-if="errors.account_id" class="invalid-feedback">
+                        {{ errors.account_id[0] }}
+                    </div>
                 </div>
                 <!-- Closing Date  -->
                 <div class="col-md-6">
                     <label for="closing_date" class="form-label">Дата закриття</label>
                     <div class="input-group">
-                        <span class="input-group-text"><i class="bi bi-telephone"></i></span>
+                        <span class="input-group-text"><i class="bi bi-calendar"></i></span>
                         <input
                             type="date"
                             class="form-control"
                             id="closing_date"
                             v-model="closing_date"
+                            :class="{'is-invalid': errors.closing_date}"
                             placeholder="DD.MM.YYYY"
                         >
+                        <div v-if="errors.closing_date" class="invalid-feedback">
+                            {{ errors.closing_date[0] }}
+                        </div>
                     </div>
+
                 </div>
 
                 <!-- Submit Button -->
                 <div class="col-12 mt-4">
                     <button type="submit" class="btn btn-primary w-100" :disabled="loading">
                         <i class="bi bi-file-earmark-plus me-2"></i>
-                        {{ loading ? 'Створення...' : 'Створити аккаунт' }}
+                        {{ loading ? 'Створення...' : 'Створити Угоду' }}
                     </button>
                 </div>
             </div>
@@ -120,27 +130,48 @@ export default {
         };
     },
     methods: {
+        async fetchAccounts() {
+            try {
+                let response = await axios.get('/api/accounts');
+                this.accounts = response.data.data;
+            } catch (error) {
+                console.error('Помилка отримання акаунтів:', error);
+            }
+        },
         async submitForm() {
             this.errors = {};
             this.loading = true;
             this.message = null;
 
             try {
-                await axios.post('/api/create-deal', {
+                const response = await axios.post('/api/create-deal', {
                     name: this.name,
                     stage: this.stage,
                     account_id: this.account_id,
                     closing_date: this.closing_date,
                 });
 
-                this.message = {
-                    type: 'success',
-                    text: 'Аккаунт успішно створено!'
-                };
-                this.resetForm();
+                if (response.data && response.data.status && response.data.status === 'error') {
+                    this.message = {
+                        type: 'error',
+                        text: response.data.message || 'Помилка створення угоди.'
+                    };
+                } else {
+                    this.message = {
+                        type: 'success',
+                        text: 'Угоду успішно створено!'
+                    };
+                    this.resetForm();
+                }
 
-            }catch (error) {
-                if (error.response && error.response.status === 400) {
+            } catch (error) {
+
+                if (error.response.code === 'AUTHENTICATION_FAILURE') {
+                    this.message = {
+                        type: 'error',
+                        text: 'Помилка аутентифікації: ' + error.response.message
+                    };
+                } else if (error.response && error.response.status === 422) {
                     this.errors = error.response.data.errors;
                 } else {
                     this.message = {
@@ -154,10 +185,14 @@ export default {
 
         resetForm() {
             this.name = '';
-            this.website = '';
-            this.phone = '';
+            this.stage = '';
+            this.account_id = '';
+            this.closing_date = '';
             this.errors = {};
         }
+    },
+    mounted() {
+        this.fetchAccounts();
     }
 };
 </script>
@@ -165,7 +200,7 @@ export default {
 <style scoped>
 .card {
     max-width: 550px;
-    margin:  100px auto;
+    margin: 100px auto;
     border-radius: 10px;
 }
 
