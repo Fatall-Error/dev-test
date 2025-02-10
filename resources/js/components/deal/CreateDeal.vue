@@ -11,7 +11,7 @@
                         type="text"
                         class="form-control"
                         id="dealName"
-                        v-model="name"
+                        v-model="dealName"
                         placeholder="Введіть назву угоди"
                         required
                     >
@@ -23,7 +23,7 @@
                     <select
                         class="form-select"
                         id="dealStage"
-                        v-model="stage"
+                        v-model="dealStage"
                         required
                     >
                         <option value="" disabled>Оберіть стадію</option>
@@ -34,15 +34,15 @@
                     </select>
                 </div>
 
-                <!-- Компанія -->
+                <!-- Аккаунт -->
                 <div class="col-md-6">
-                    <label for="company" class="form-label">Компанія</label>
+                    <label for="account_id" class="form-label">Аккаунт</label>
                     <input
                         type="text"
                         class="form-control"
-                        id="company"
+                        id="account_id"
                         v-model="account_id"
-                        placeholder="Введіть назву компанії"
+                        placeholder="Виберіть  аккаунт"
                         required
                     >
                 </div>
@@ -53,7 +53,7 @@
                     <div class="input-group">
                         <span class="input-group-text"><i class="bi bi-globe"></i></span>
                         <input
-                            type="url"
+                            type="text"
                             class="form-control"
                             id="website"
                             v-model="website"
