@@ -76,13 +76,15 @@ export default {
             website: '',
             phone: '',
             errors: {},
-            loading: false
+            loading: false,
+            message: null
         };
     },
     methods: {
         async submitForm() {
             this.errors = {};
             this.loading = true;
+            this.message = null;
 
             try {
                 await axios.post('/api/create-account', {
@@ -91,14 +93,20 @@ export default {
                     phone: this.phone,
                 });
 
-                alert("Успішно створено!");
+                this.message = {
+                    type: 'success',
+                    text: 'Аккаунт успішно створено!'
+                };
                 this.resetForm();
 
             } catch (error) {
                 if (error.response && error.response.status === 422) {
                     this.errors = error.response.data.errors;
                 } else {
-                    alert("Сталася помилка: " + error.message);
+                    this.message = {
+                        type: 'error',
+                        text: "Сталася помилка: " + error.message
+                    };
                 }
             }
 
@@ -120,5 +128,9 @@ export default {
     max-width: 550px;
     margin: auto;
     border-radius: 10px;
+}
+
+.alert {
+    margin-bottom: 15px;
 }
 </style>
