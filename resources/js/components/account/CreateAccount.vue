@@ -3,8 +3,11 @@
         <div class="card-body">
             <h5 class="card-title mb-4">Створення нового аккаунту</h5>
 
+            <div v-if="message" :class="message.type" class="alert alert-dismissible fade show">
+                <strong>{{ message.type === 'success' ? 'Успіх!' : 'Помилка!' }}</strong> {{ message.text }}
+                <button type="button" class="btn-close" @click="message = null"></button>
+            </div>
             <div class="row g-3">
-                <!-- Name account -->
                 <div class="col-12">
                     <label for="name" class="form-label">Назва аккаунту</label>
                     <input
@@ -12,12 +15,14 @@
                         class="form-control"
                         id="name"
                         v-model="name"
+                        :class="{'is-invalid': errors.name}"
                         placeholder="Введіть назву аккаунту"
                         required
                     >
+                    <div v-if="errors.name" class="invalid-feedback">
+                        {{ errors.name[0] }}
+                    </div>
                 </div>
-
-                <!-- Website -->
                 <div class="col-md-6">
                     <label for="website" class="form-label">Вебсайт</label>
                     <div class="input-group">
@@ -27,11 +32,14 @@
                             class="form-control"
                             id="website"
                             v-model="website"
+                            :class="{'is-invalid': errors.website}"
                             placeholder="https://example.com"
                         >
+                        <div v-if="errors.website" class="invalid-feedback">
+                            {{ errors.website[0] }}
+                        </div>
                     </div>
                 </div>
-
                 <div class="col-md-6">
                     <label for="phone" class="form-label">Телефон</label>
                     <div class="input-group">
@@ -41,16 +49,18 @@
                             class="form-control"
                             id="phone"
                             v-model="phone"
+                            :class="{'is-invalid': errors.phone}"
                             placeholder="+380 (XX) XXX-XXXX"
                         >
+                        <div v-if="errors.phone" class="invalid-feedback">
+                            {{ errors.phone[0] }}
+                        </div>
                     </div>
                 </div>
-
-                <!-- Submit Button -->
                 <div class="col-12 mt-4">
-                    <button type="submit" class="btn btn-primary w-100">
+                    <button type="submit" class="btn btn-primary w-100" :disabled="loading">
                         <i class="bi bi-file-earmark-plus me-2"></i>
-                        Створити аккаунт
+                        {{ loading ? 'Створення...' : 'Створити аккаунт' }}
                     </button>
                 </div>
             </div>
@@ -62,25 +72,53 @@
 export default {
     data() {
         return {
-            owner_id: '',
-            account_id: '',
+            name: '',
             website: '',
             phone: '',
+            errors: {},
+            loading: false
         };
     },
     methods: {
-        submitForm() {
-            axios.post('/api/create-account', {
-                owner_id: this.owner_id,
-                account_id: this.account_id,
-                website: this.website,
-                phone: this.phone,
-            }).then(response => {
+        async submitForm() {
+            this.errors = {};
+            this.loading = true;
+
+            try {
+                await axios.post('/api/create-account', {
+                    name: this.name,
+                    website: this.website,
+                    phone: this.phone,
+                });
+
                 alert("Успішно створено!");
-            }).catch(error => {
-                alert("Помилка: " + error.response.data);
-            });
+                this.resetForm();
+
+            } catch (error) {
+                if (error.response && error.response.status === 422) {
+                    this.errors = error.response.data.errors;
+                } else {
+                    alert("Сталася помилка: " + error.message);
+                }
+            }
+
+            this.loading = false;
+        },
+
+        resetForm() {
+            this.name = '';
+            this.website = '';
+            this.phone = '';
+            this.errors = {};
         }
     }
 };
 </script>
+
+<style scoped>
+.card {
+    max-width: 550px;
+    margin: auto;
+    border-radius: 10px;
+}
+</style>

@@ -4,40 +4,42 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 
+use App\Http\Requests\StoreAccountRequest;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Http;
 
 class ZohoController extends Controller
 {
-    private $owner_id = 807524000000432001;
+    protected $owner_id = 807524000000432001;
+    protected $apiDomain;
+    protected $apiAccessToken;
 
-    public function createAccount(Request $request)
+    public function __construct()
+    {
+        $this->apiDomain = env('ZOHO_API_DOMAIN');
+        $this->apiAccessToken = $this->getZohoAccessToken();
+    }
+
+    public function createAccount(StoreAccountRequest $request)
     {
 
-        $token = $this->getZohoAccessToken();
+        $url = $this->apiDomain."/crm/v7/Accounts";
 
-        $accountsUrl = env('ZOHO_API_DOMAIN');
-        $url = $accountsUrl."/crm/v7/Accounts";
-
-
-        $response = Http::withHeaders([
-            "Authorization" => "Bearer " . $token,
-            "Content-Type" => "application/json",
-            'Cookie'        => '_zcsr_tmp=c34e06dc-94a6-4ffc-a3e7-074ba22638ab; crmcsr=c34e06dc-94a6-4ffc-a3e7-074ba22638ab'
-        ])->post($url, [
+        $data = [
             "data" => [
                 [
-
-                    "Ownership" => "Private",
-                    "Description" => "Design your own layouts that align your business processes precisely.",
-                    "Rating" => "Active",
-                    "Website" => "crm.zoho.com",
-                    "Phone" => "988844559",
-                    "Account_Name" => "Account_Name",
+                    "Website" => $request->website,
+                    "Phone" => $request->phone,
+                    "Account_Name" => $request->name,
                 ]
             ]
-        ]);
+        ];
+
+        $response = Http::withHeaders([
+            "Authorization" => "Bearer " . $this->apiAccessToken,
+            "Content-Type" => "application/json"
+        ])->post($url, $data);
 
         return $response->json();
     }
