@@ -1,4 +1,24 @@
 <template>
+    <section>
+        <div class="container">
+            <div class="row">
+                <div class="col-md-12">
+                    <nav aria-label="breadcrumb">
+                        <ol class="breadcrumb">
+                            <li class="breadcrumb-item">
+                                <a href="/">Головна</a>
+                            </li>
+                            <li class="breadcrumb-item">
+                                <a href="/zoho-crm">Форми</a>
+                            </li>
+                            <li class="breadcrumb-item active" aria-current="page">Створення аккаунту</li>
+                        </ol>
+                    </nav>
+                </div>
+            </div>
+        </div>
+    </section>
+
     <form @submit.prevent="submitForm" class="card shadow-sm p-4">
         <div class="card-body">
             <h5 class="card-title mb-4">Створення нового аккаунту</h5>
