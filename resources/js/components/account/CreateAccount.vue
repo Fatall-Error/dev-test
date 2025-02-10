@@ -38,7 +38,6 @@
                         v-model="name"
                         :class="{'is-invalid': errors.name}"
                         placeholder="Введіть назву аккаунту"
-                        required
                     >
                     <div v-if="errors.name" class="invalid-feedback">
                         {{ errors.name[0] }}
@@ -120,12 +119,12 @@ export default {
                 if (response.data && response.data.status && response.data.status === 'error') {
                     this.message = {
                         type: 'error',
-                        text: response.data.message || 'Помилка створення угоди.'
+                        text: response.data.message || 'Помилка створення аккаунту.'
                     };
                 } else {
                     this.message = {
                         type: 'success',
-                        text: 'Угоду успішно створено!'
+                        text: 'аккаунт успішно створено!'
                     };
                     this.resetForm();
                 }
