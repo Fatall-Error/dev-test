@@ -3,7 +3,7 @@
         <div class="card-body">
             <h5 class="card-title mb-4">Створення нового аккаунту</h5>
 
-            <div v-if="message" :class="message.type" class="alert alert-dismissible fade show">
+            <div v-if="message" :class="['alert', 'alert-dismissible', 'fade', 'show', message.type === 'success' ? 'alert-success' : 'alert-danger']">
                 <strong>{{ message.type === 'success' ? 'Успіх!' : 'Помилка!' }}</strong> {{ message.text }}
                 <button type="button" class="btn-close" @click="message = null"></button>
             </div>
@@ -100,7 +100,7 @@ export default {
                 this.resetForm();
 
             } catch (error) {
-                if (error.response && error.response.status === 422) {
+                if (error.response && error.response.status === 400) {
                     this.errors = error.response.data.errors;
                 } else {
                     this.message = {
